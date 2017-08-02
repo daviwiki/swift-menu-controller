@@ -246,7 +246,7 @@ extension SwipeZoomMenuViewController {
     @nonobjc static var animatorSafePointer: Int32 = 3
     @nonobjc static var acelerationSafePointer: Int32 = 4
     
-    private var animator: UIViewPropertyAnimator? {
+    fileprivate var animator: UIViewPropertyAnimator? {
         get {
             return objc_getAssociatedObject(self, &SwipeZoomMenuViewController.animatorSafePointer) as? UIViewPropertyAnimator
         }
@@ -255,9 +255,9 @@ extension SwipeZoomMenuViewController {
         }
     }
     
-    private var aceleration: Double {
+    fileprivate var acceleration: (TimeInterval, CGFloat) {
         get {
-            return objc_getAssociatedObject(self, &SwipeZoomMenuViewController.acelerationSafePointer) as? Double ?? 0.0
+            return objc_getAssociatedObject(self, &SwipeZoomMenuViewController.acelerationSafePointer) as? (TimeInterval, CGFloat) ?? (0, 0)
         }
         set {
             objc_setAssociatedObject(self, &SwipeZoomMenuViewController.acelerationSafePointer, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
@@ -299,6 +299,9 @@ extension SwipeZoomMenuViewController {
         
         switch gesture.state {
         case .began:
+            
+            acceleration = (Date.timeIntervalSinceReferenceDate, translation.x)
+            
             let tScale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
             let tTranslation = CGAffineTransform(translationX: maxX, y: 0.0)
             let tResult = tScale.concatenating(tTranslation)
@@ -327,7 +330,17 @@ extension SwipeZoomMenuViewController {
             leftGesture?.isEnabled = false
             rightGesture?.isEnabled = false
             
-            if percent < 0.6 {
+            // Check if the animation must continue or reverse
+            var mustReverse = percent < 0.6
+            
+            let now = Date.timeIntervalSinceReferenceDate
+            let currentX = translation.x
+            
+            if (now - acceleration.0 < 0.2 && currentX - acceleration.1 > 70) {
+                mustReverse = false
+            }
+            
+            if mustReverse {
                 animatorLeft?.isReversed = true
                 
                 animatorLeft?.addCompletion({ (_) in
@@ -386,6 +399,8 @@ extension SwipeZoomMenuViewController {
         switch gesture.state {
         case .began:
             
+            acceleration = (Date.timeIntervalSinceReferenceDate, translation.x)
+            
             let tResult = CGAffineTransform.identity
             let timing = UICubicTimingParameters(animationCurve: .easeInOut)
             animatorRight = UIViewPropertyAnimator(duration: animationDuration, timingParameters: timing)
@@ -406,7 +421,16 @@ extension SwipeZoomMenuViewController {
             leftGesture?.isEnabled = false
             rightGesture?.isEnabled = false
             
-            if percent < 0.6 {
+            var mustReverse = percent < 0.6
+            
+            let now = Date.timeIntervalSinceReferenceDate
+            let currentX = translation.x
+            
+            if (now - acceleration.0 < 0.2 && -1*(currentX - acceleration.1) > 70) {
+                mustReverse = false
+            }
+            
+            if mustReverse {
                 animatorRight?.isReversed = true
                 
                 animatorRight?.addCompletion({ (_) in
