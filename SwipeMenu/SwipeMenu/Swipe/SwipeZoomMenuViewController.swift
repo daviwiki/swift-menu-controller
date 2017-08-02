@@ -49,6 +49,11 @@ class SwipeZoomMenuViewController: UIViewController {
         case slideClose
     }
     
+    fileprivate enum EdgeType {
+        case leftEdge
+        case rightEdge
+    }
+    
     // External accesible properties
     fileprivate var configuration = Configuration()
     fileprivate var contentVC: UIViewController?
@@ -243,8 +248,8 @@ extension SwipeZoomMenuViewController: SwipeZoomMenuInput {
  */
 extension SwipeZoomMenuViewController {
     
-    @nonobjc static var animatorSafePointer: Int32 = 3
-    @nonobjc static var acelerationSafePointer: Int32 = 4
+    @nonobjc static var animatorSafePointer: Int32 = 0
+    @nonobjc static var acelerationSafePointer: Int32 = 1
     
     fileprivate var animator: UIViewPropertyAnimator? {
         get {
@@ -270,100 +275,8 @@ extension SwipeZoomMenuViewController {
  */
 extension SwipeZoomMenuViewController {
 
-    @nonobjc static var animatorLeftSafePointer: Int32 = 0
-    
-    private var animatorLeft: UIViewPropertyAnimator? {
-        get {
-            return objc_getAssociatedObject(self, &SwipeZoomMenuViewController.animatorLeftSafePointer) as? UIViewPropertyAnimator
-        }
-        set {
-            objc_setAssociatedObject(self, &SwipeZoomMenuViewController.animatorLeftSafePointer, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
-        }
-    }
-    
     @objc func leftGesture(_ gesture: UIScreenEdgePanGestureRecognizer) {
-        
-        guard let transformView = contentContainerView else { return }
-        guard let view = gesture.view else { return }
-        guard (currentAnimationType == .none || currentAnimationType == .slideOpen) else { return }
-        currentAnimationType = .slideOpen
-        
-        let windowWidth = view.frame.width
-        let marginRight = configuration.marginRight
-        let scaleFactor = configuration.scaleFactor
-        let animationDuration = configuration.animationDuration
-        
-        let translation = gesture.translation(in: view)
-        let maxX = windowWidth - marginRight - ((1 - scaleFactor) * windowWidth) / 2.0
-        let percent = translation.x / windowWidth
-        
-        switch gesture.state {
-        case .began:
-            
-            acceleration = (Date.timeIntervalSinceReferenceDate, translation.x)
-            
-            let tScale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-            let tTranslation = CGAffineTransform(translationX: maxX, y: 0.0)
-            let tResult = tScale.concatenating(tTranslation)
-            
-            let timing = UICubicTimingParameters(animationCurve: .easeInOut)
-            animatorLeft = UIViewPropertyAnimator(duration: animationDuration, timingParameters: timing)
-            animatorLeft?.addAnimations {
-                transformView.transform = tResult
-            }
-            animatorLeft?.addCompletion({ (position: UIViewAnimatingPosition) in
-                self.currentAnimationType = .none
-            })
-            animatorLeft?.stopAnimation(false)
-            
-            break
-        case .changed:
-            animatorLeft?.fractionComplete = percent
-            break
-        case .ended, .cancelled:
-            
-            // We block gestures until animation is finish. This technique avoid
-            // an exception due to NSInternalInconsistencyException for
-            // no animation block to start (possible multiple animations executing
-            // at the same time) when user perform an edge gesture over and over
-            // again
-            leftGesture?.isEnabled = false
-            rightGesture?.isEnabled = false
-            
-            // Check if the animation must continue or reverse
-            var mustReverse = percent < 0.6
-            
-            let now = Date.timeIntervalSinceReferenceDate
-            let currentX = translation.x
-            
-            if (now - acceleration.0 < 0.2 && currentX - acceleration.1 > 70) {
-                mustReverse = false
-            }
-            
-            if mustReverse {
-                animatorLeft?.isReversed = true
-                
-                animatorLeft?.addCompletion({ (_) in
-                    self.leftGesture?.isEnabled = true
-                    self.rightGesture?.isEnabled = false
-                })
-                
-            } else {
-                addContentContainerBlockLayer()
-                
-                animatorLeft?.addCompletion({ (_) in
-                    self.leftGesture?.isEnabled = false
-                    self.rightGesture?.isEnabled = true
-                })
-            }
-            
-            animatorLeft?.startAnimation()
-            
-            break
-        default:
-            break
-        }
-        
+        manageEdgePanGesture(gesture: gesture, type: .slideOpen)
     }
     
 }
@@ -373,50 +286,67 @@ extension SwipeZoomMenuViewController {
  */
 extension SwipeZoomMenuViewController {
     
-    @nonobjc static var animatorRightSafePointer: Int32 = 1
-    
-    private var animatorRight: UIViewPropertyAnimator? {
-        get {
-            return objc_getAssociatedObject(self, &SwipeZoomMenuViewController.animatorRightSafePointer) as? UIViewPropertyAnimator
-        }
-        set {
-            objc_setAssociatedObject(self, &SwipeZoomMenuViewController.animatorRightSafePointer, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
-        }
+    @objc func rightGesture (_ gesture: UIScreenEdgePanGestureRecognizer) {
+        manageEdgePanGesture(gesture: gesture, type: .slideClose)
     }
     
-    @objc func rightGesture (_ gesture: UIScreenEdgePanGestureRecognizer) {
+}
+
+/**
+ SwipeZoomMenuViewController extension to manage left/right gesture recognizers
+ */
+extension SwipeZoomMenuViewController {
+    
+    fileprivate func manageEdgePanGesture(gesture: UIScreenEdgePanGestureRecognizer, type: AnimationType) {
         
         guard let transformView = contentContainerView else { return }
         guard let view = gesture.view else { return }
-        guard (currentAnimationType == .none || currentAnimationType == .slideClose) else { return }
-        currentAnimationType = .slideClose
+        guard (currentAnimationType == .none || currentAnimationType == type) else { return }
+        currentAnimationType = type
         
-        let animationDuration = configuration.animationDuration
         let windowWidth = view.frame.width
+        let marginRight = configuration.marginRight
+        let scaleFactor = configuration.scaleFactor
+        let animationDuration = configuration.animationDuration
+        
         let translation = gesture.translation(in: view)
-        let percent = -1*translation.x / windowWidth
+        let maxX = windowWidth - marginRight - ((1 - scaleFactor) * windowWidth) / 2.0
+        let percent = abs(translation.x) / windowWidth
         
         switch gesture.state {
         case .began:
             
+            // Calculate initial acceleration
             acceleration = (Date.timeIntervalSinceReferenceDate, translation.x)
             
-            let tResult = CGAffineTransform.identity
             let timing = UICubicTimingParameters(animationCurve: .easeInOut)
-            animatorRight = UIViewPropertyAnimator(duration: animationDuration, timingParameters: timing)
-            animatorRight?.addAnimations {
-                transformView.transform = tResult
+            animator = UIViewPropertyAnimator(duration: animationDuration, timingParameters: timing)
+            
+            if type == .slideOpen {
+                animator?.addAnimations {
+                    transformView.transform = self.getOpenTransform(translation: maxX)
+                }
+            } else if type == .slideClose {
+                animator?.addAnimations {
+                    transformView.transform = self.getCloseTransform()
+                }
+            } else {
+                animator = nil
+                gesture.isEnabled = false
+                gesture.isEnabled = true
+                return
             }
-            animatorRight?.addCompletion({ (position: UIViewAnimatingPosition) in
+            
+            animator?.addCompletion({ (_) in
                 self.currentAnimationType = .none
             })
-            animatorRight?.stopAnimation(false)
+            animator?.stopAnimation(false)
+            break
             
-            break
         case .changed:
-            animatorRight?.fractionComplete = percent
+            animator?.fractionComplete = percent
             break
-        case .cancelled, .ended:
+        case .ended, .cancelled:
             
             leftGesture?.isEnabled = false
             rightGesture?.isEnabled = false
@@ -426,34 +356,56 @@ extension SwipeZoomMenuViewController {
             let now = Date.timeIntervalSinceReferenceDate
             let currentX = translation.x
             
-            if (now - acceleration.0 < 0.2 && -1*(currentX - acceleration.1) > 70) {
+            if (now - acceleration.0 < 0.2 && abs(currentX - acceleration.1) > 70) {
                 mustReverse = false
             }
             
-            if mustReverse {
-                animatorRight?.isReversed = true
-                
-                animatorRight?.addCompletion({ (_) in
-                    self.leftGesture?.isEnabled = false
-                    self.rightGesture?.isEnabled = true
-                })
-                
-            } else {
-                removeContentContainerBlockLayer()
-                
-                animatorRight?.addCompletion({ (_) in
-                    self.leftGesture?.isEnabled = true
-                    self.rightGesture?.isEnabled = false
-                })
-                
+            animator?.isReversed = mustReverse
+            
+            animator?.addCompletion({ (_) in
+                self.reactivateGestures(for: type, reversed: mustReverse)
+            })
+            
+            if mustReverse == false {
+                manageAdditionalLayers(for: type)
             }
-            animatorRight?.startAnimation()
+            
+            animator?.startAnimation()
             
             break
         default:
             break
         }
-    
+        
     }
     
+    private func manageAdditionalLayers (`for` type: AnimationType) {
+        if type == .slideOpen {
+            addContentContainerBlockLayer()
+        } else {
+            removeContentContainerBlockLayer()
+        }
+    }
+    
+    private func reactivateGestures(`for` type: AnimationType, reversed: Bool) {
+        if type == .slideOpen {
+            leftGesture?.isEnabled = reversed
+            rightGesture?.isEnabled = !reversed
+        } else if type == .slideClose {
+            leftGesture?.isEnabled = !reversed
+            rightGesture?.isEnabled = reversed
+        }
+    }
+    
+    private func getOpenTransform(translation x: CGFloat) -> CGAffineTransform {
+        let scaleFactor = configuration.scaleFactor
+        let tScale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+        let tTranslation = CGAffineTransform(translationX: x, y: 0.0)
+        let tResult = tScale.concatenating(tTranslation)
+        return tResult
+    }
+    
+    private func getCloseTransform() -> CGAffineTransform {
+        return CGAffineTransform.identity
+    }
 }

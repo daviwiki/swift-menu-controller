@@ -16,7 +16,7 @@ swipe.setMenuController(vc: menu)
 ```
 
 ## Result
-<img src="./readme/menu.gif" alt="Drawing" style="width: 300px;"/>
+<img src="./readme/menu.gif" width="300"/>
 
 ## Thanks
 Special thanks to [Jackie Tran](https://dribbble.com/shots/1310536-Menu-screen) for it mobile inspiration design.
