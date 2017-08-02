@@ -287,7 +287,6 @@ extension SwipeZoomMenuViewController {
         guard let view = gesture.view else { return }
         guard (currentAnimationType == .none || currentAnimationType == .slideOpen) else { return }
         currentAnimationType = .slideOpen
-        print("Slide open")
         
         let windowWidth = view.frame.width
         let marginRight = configuration.marginRight
@@ -320,13 +319,31 @@ extension SwipeZoomMenuViewController {
             break
         case .ended, .cancelled:
             
+            // We block gestures until animation is finish. This technique avoid
+            // an exception due to NSInternalInconsistencyException for
+            // no animation block to start (possible multiple animations executing
+            // at the same time) when user perform an edge gesture over and over
+            // again
+            leftGesture?.isEnabled = false
+            rightGesture?.isEnabled = false
+            
             if percent < 0.6 {
                 animatorLeft?.isReversed = true
+                
+                animatorLeft?.addCompletion({ (_) in
+                    self.leftGesture?.isEnabled = true
+                    self.rightGesture?.isEnabled = false
+                })
+                
             } else {
                 addContentContainerBlockLayer()
-                leftGesture?.isEnabled = false
-                rightGesture?.isEnabled = true
+                
+                animatorLeft?.addCompletion({ (_) in
+                    self.leftGesture?.isEnabled = false
+                    self.rightGesture?.isEnabled = true
+                })
             }
+            
             animatorLeft?.startAnimation()
             
             break
@@ -361,7 +378,6 @@ extension SwipeZoomMenuViewController {
         guard (currentAnimationType == .none || currentAnimationType == .slideClose) else { return }
         currentAnimationType = .slideClose
         
-        print("slide close")
         let animationDuration = configuration.animationDuration
         let windowWidth = view.frame.width
         let translation = gesture.translation(in: view)
@@ -387,12 +403,25 @@ extension SwipeZoomMenuViewController {
             break
         case .cancelled, .ended:
             
+            leftGesture?.isEnabled = false
+            rightGesture?.isEnabled = false
+            
             if percent < 0.6 {
                 animatorRight?.isReversed = true
+                
+                animatorRight?.addCompletion({ (_) in
+                    self.leftGesture?.isEnabled = false
+                    self.rightGesture?.isEnabled = true
+                })
+                
             } else {
                 removeContentContainerBlockLayer()
-                leftGesture?.isEnabled = true
-                rightGesture?.isEnabled = false
+                
+                animatorRight?.addCompletion({ (_) in
+                    self.leftGesture?.isEnabled = true
+                    self.rightGesture?.isEnabled = false
+                })
+                
             }
             animatorRight?.startAnimation()
             
