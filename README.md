@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/badge/version-1.0.0-blue.svg)
 
-## What will you see ...
+## What you will see ...
 <img src="./readme/menu.gif" width="300"/>
 
 ## Requirements
