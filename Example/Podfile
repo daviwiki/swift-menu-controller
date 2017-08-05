@@ -1,14 +1,16 @@
 use_frameworks!
+inhibit_all_warnings!
+platform :ios, '10.0'
 
 target 'SwipeMenu_Example' do
-  pod 'SwipeMenu', :path => '../'
-
-  target 'SwipeMenu_Tests' do
-    inherit! :search_paths
-
-    pod 'Quick', '~> 1.0.0'
-  pod 'Nimble', '~> 5.1.1'
-  pod 'FBSnapshotTestCase'
-  pod 'Nimble-Snapshots'
-  end
+    pod 'SwipeMenu', :path => '../'
+    
+    target 'SwipeMenu_Tests' do
+        inherit! :search_paths
+        
+        pod 'Quick', '~> 1.0.0'
+        pod 'Nimble', '~> 5.1.1'
+        pod 'FBSnapshotTestCase'
+        pod 'Nimble-Snapshots'
+    end
 end

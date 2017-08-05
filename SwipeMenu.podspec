@@ -8,35 +8,26 @@
 
 Pod::Spec.new do |s|
   s.name             = 'SwipeMenu'
-  s.version          = '0.1.0'
-  s.summary          = 'A short description of SwipeMenu.'
-
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
+  s.version          = '1.0.0'
+  s.summary          = 'Swipe menu is a little piece that add you support to display a menu easily'
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+SwipeMenu offers you a rapid implementation to display a menu with two items:
+
+- The menu controller
+- The content controller
+
+in a few lines of code.
                        DESC
 
-  s.homepage         = 'https://github.com/acct<blob>=0x50617373776F726473C2A06E6F74C2A07361766564  Passwords0240not0240saved/SwipeMenu'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
+  s.homepage         = 'https://github.com/daviwiki/swift-menu-controller'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'acct<blob>=0x50617373776F726473C2A06E6F74C2A07361766564  Passwords0240not0240saved' => 'daviddvd19@gmail.com' }
-  s.source           = { :git => 'https://github.com/acct<blob>=0x50617373776F726473C2A06E6F74C2A07361766564  Passwords0240not0240saved/SwipeMenu.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.author           = { "David Martínez" => "daviddvd19@gmail.com" }
+  s.source           = { :git => 'git@github.com:daviwiki/swift-menu-controller.git', :tag => s.version.to_s }
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '10.0'
 
-  s.source_files = 'SwipeMenu/Classes/**/*'
-  
-  # s.resource_bundles = {
-  #   'SwipeMenu' => ['SwipeMenu/Assets/*.png']
-  # }
+  s.source_files    = 'SwipeMenu/Classes/**/*'
+  s.framework       = 'UIKit'
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end
