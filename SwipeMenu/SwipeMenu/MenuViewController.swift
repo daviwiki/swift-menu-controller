@@ -8,8 +8,18 @@
 
 import UIKit
 
+protocol MenuViewControllerOutput {
+    
+    typealias Completion = () -> ()
+    
+    func closeMenu(completion: Completion?)
+    
+}
+
 class MenuViewController: UIViewController {
 
+    fileprivate var output: MenuViewControllerOutput?
+    
     @IBOutlet weak var gradientView: UIView!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
@@ -27,7 +37,7 @@ class MenuViewController: UIViewController {
         
     }
 
-    func setupMenuBackground() {
+    private func setupMenuBackground() {
         
         for view in gradientView.subviews {
             view.layer.cornerRadius = view.frame.width / 2.0
@@ -47,11 +57,13 @@ class MenuViewController: UIViewController {
         gradientView.addSubview(blurEffectView)
         gradientView.bringSubview(toFront: blurEffectView)
     }
+    
+    func setOutput(output: MenuViewControllerOutput) {
+        self.output = output
+    }
 }
 
-extension MenuViewController: UITableViewDelegate {
-    
-}
+extension SwipeZoomMenuViewController: MenuViewControllerOutput {}
 
 extension MenuViewController: UITableViewDataSource {
     
@@ -74,6 +86,18 @@ extension MenuViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 64.0
     }
+    
+}
+
+extension MenuViewController: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        output?.closeMenu(completion: {
+            print("My close action")
+            // perform navigation to
+        })
+    }
+    
 }
 
 class MenuCell: UITableViewCell {

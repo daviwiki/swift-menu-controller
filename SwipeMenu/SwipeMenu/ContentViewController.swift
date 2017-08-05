@@ -9,7 +9,10 @@
 import UIKit
 
 protocol ContentViewControllerOutput: NSObjectProtocol {
-    func openMenu()
+    
+    typealias Completion = () -> ()
+    
+    func openMenu(completion: Completion?)
 }
 
 class ContentViewController: UIViewController {
@@ -28,7 +31,9 @@ class ContentViewController: UIViewController {
     }
     
     @objc private func openMenu() {
-        output?.openMenu()
+        output?.openMenu(completion: { 
+            print("My open action")
+        })
     }
     
 }

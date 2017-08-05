@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let menu = storyboard.instantiateViewController(withIdentifier: "menu") as! MenuViewController
         let content = storyboard.instantiateViewController(withIdentifier: "content") as! ContentViewController
         content.setOutput(output: swipe)
+        menu.setOutput(output: swipe)
         swipe.setContentController(vc: content)
         swipe.setMenuController(vc: menu)
         

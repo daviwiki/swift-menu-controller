@@ -10,6 +10,8 @@ import UIKit
 
 protocol SwipeZoomMenuInput {
     
+    typealias Completion = () -> ()
+    
     func setConfiguration(configuration: SwipeZoomMenuViewController.Configuration)
     func setContentController(vc: UIViewController)
     func setMenuController(vc: UIViewController)
@@ -17,12 +19,12 @@ protocol SwipeZoomMenuInput {
     /**
      Open the menu programatically with animation
      */
-    func openMenu()
+    func openMenu(completion: Completion?)
     
     /**
      Close the menu with animation
      */
-    func closeMenu()
+    func closeMenu(completion: Completion?)
     
 }
 
@@ -156,7 +158,7 @@ extension SwipeZoomMenuViewController: SwipeZoomMenuInput {
         vc.didMove(toParentViewController: self)
     }
     
-    func openMenu() {
+    func openMenu(completion: SwipeZoomMenuInput.Completion? = nil) {
         
         guard let transformView = contentContainerView else { return }
         guard currentAnimationType == .none else { return }
@@ -187,6 +189,8 @@ extension SwipeZoomMenuViewController: SwipeZoomMenuInput {
             self.rightGesture?.isEnabled = true
             self.leftGesture?.isEnabled = false
             self.currentAnimationType = .none
+            
+            completion?()
         }
         
         animator.startAnimation()
@@ -210,7 +214,7 @@ extension SwipeZoomMenuViewController: SwipeZoomMenuInput {
         closeMenu()
     }
     
-    func closeMenu() {
+    func closeMenu(completion: SwipeZoomMenuInput.Completion? = nil) {
         
         guard let transformView = contentContainerView else { return }
         guard currentAnimationType == .none else { return }
@@ -232,6 +236,8 @@ extension SwipeZoomMenuViewController: SwipeZoomMenuInput {
             self.leftGesture?.isEnabled = true
             self.rightGesture?.isEnabled = false
             self.currentAnimationType = .none
+            
+            completion?()
         }
         
         animator.startAnimation()
