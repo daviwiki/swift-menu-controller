@@ -1,5 +1,5 @@
 PODS:
-  - SwipeMenu (1.0.0)
+  - SwipeMenu (2.0.0)
 
 DEPENDENCIES:
   - SwipeMenu (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  SwipeMenu: b303ed26b4beee2677b96e5c0f865e97e20d85c8
+  SwipeMenu: 5e04366edd68fc4059df9167e1e3dd90642fc18e
 
 PODFILE CHECKSUM: 75e7ccd7433d1f3d6a4e6e664db238e763a730d5
 
