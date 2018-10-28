@@ -1,6 +1,6 @@
 # SwipeMenu
 
-![](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![](https://img.shields.io/badge/version-2.0.0-blue.svg)
 
 ## What you will see ...
 <img src="./readme/menu.gif" width="300"/>
@@ -11,11 +11,14 @@ iOs 10
 
 ## Installation and Usage
 
-SwipeMenu is available through [Github](https://github.com/daviwiki/swift-menu-controller). To install
-it, simply add the following line to your Podfile:
-
+SwipeMenu is available through my private repository at github so, if you want to install in this way you must include this into your Podfile:
 ```ruby
-pod "SwipeMenu", :git => "https://github.com/daviwiki/swift-menu-controller", :branch => "feature/pod"
+source 'https://github.com/daviwiki/daviwiki-podspecs'
+```
+
+Once included you could import the Pod into your desired spec.
+```ruby
+pod "SwipeMenu"
 ```
 
 Once SwipeMenu are installed into your app you can start and use it. In the following example we suppose that you have a storyboard (called *Main*) with three controllers:
@@ -49,10 +52,10 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
 
 ## Example
 
-To run the example project, clone [the repo](https://github.com/daviwiki/swift-menu-controller/tree/feature/pod), and run `pod install` from the Example directory first. Follow the next steps:
+To run the example project, clone [the repo](https://github.com/daviwiki/swift-menu-controller/tree/develop), and run `pod install` from the Example directory first. Follow the next steps:
 
 1. Open a console
-2. git clone https://github.com/daviwiki/swift-menu-controller/tree/feature/pod
+2. git clone https://github.com/daviwiki/swift-menu-controller/tree/develop
 3. cd swift-menu-controller/SwipeMenu/Example
 4. pod install
 
@@ -71,4 +74,4 @@ SwipeMenu is available under the MIT license. See the LICENSE file for more info
 
 ## Notes
 
-Please include all the comments, issues, tips, that you want :)
+Please include all the comments, issues, tips that you want :)
