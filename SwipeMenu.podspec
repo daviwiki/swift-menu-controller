@@ -18,10 +18,10 @@ in a few lines of code.
   s.author           = 'David Martínez'
   s.source           = { :git => 'https://github.com/daviwiki/swift-menu-controller.git', :tag => s.version.to_s }
 
+  s.swift_version = '4.1'
   s.ios.deployment_target = '10.0'
 
   s.source_files    = 'SwipeMenu/Classes/**/*'
   s.framework       = 'UIKit'
-  s.pod_target_xcconfig = { 'SWIFT_VERSION' => '4.1' }
 
 end
